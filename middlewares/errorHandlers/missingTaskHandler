@@ -1,0 +1,31 @@
+const User = require("../../models/User");
+
+const missingTaskHandler = async (req, res, next) => {
+  const userID = req.authenticatedUserID;
+  const { taskID } = req.params;
+  try {
+    const matchingUser = await User.findById(userID).lean();
+    const matchingTask = matchingUser.tasks.filter((task) => {
+      return task == taskID;
+    });
+    if (!matchingTask[0]) {
+      res.status(404).json({
+        status: "fail",
+        code: "noTask",
+        data: "Task does not exist.",
+      });
+    } else {
+      req.authenticatedTaskID = matchingTask;
+      next();
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      status: "error",
+      code: "serverError",
+      data: "Internal server error.",
+    });
+  }
+};
+
+module.exports = missingTaskHandler;

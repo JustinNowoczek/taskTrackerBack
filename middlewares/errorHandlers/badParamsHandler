@@ -1,0 +1,23 @@
+const badParamsHandler = async (req, res, next) => {
+  const { isCompleted, sortDateNotPriority } = req.params;
+  try {
+    if ((isCompleted != "true" && isCompleted != "false") || (sortDateNotPriority != "true" && sortDateNotPriority != "false")) {
+      res.status(400).json({
+        status: "fail",
+        code: "missingParams",
+        data: "Bad request.",
+      });
+    } else {
+      next();
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      status: "error",
+      code: "serverError",
+      data: "Internal server error.",
+    });
+  }
+};
+
+module.exports = badParamsHandler;

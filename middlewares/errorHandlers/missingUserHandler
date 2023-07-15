@@ -1,0 +1,26 @@
+const User = require("../../models/User");
+
+const missingUserHandler = async (req, res, next) => {
+  const { userID } = req.params;
+  try {
+    const matchingUser = await User.findById(userID);
+    if (!matchingUser) {
+      res.status(404).json({
+        status: "fail",
+        code: "noUser",
+        data: "This user does not exist.",
+      });
+    } else {
+      next();
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      status: "error",
+      code: "serverError",
+      data: "Internal server error.",
+    });
+  }
+};
+
+module.exports = missingUserHandler;

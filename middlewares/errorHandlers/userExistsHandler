@@ -1,0 +1,26 @@
+const User = require("../../models/User");
+
+const userExistsHandler = async (req, res, next) => {
+  const { name } = req.body;
+  try {
+    const matchingUser = await User.findOne({ name });
+    if (matchingUser) {
+      res.status(409).json({
+        status: "fail",
+        code: "existingUser",
+        data: "This name is taken.",
+      });
+    } else {
+      next();
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      status: "error",
+      code: "serverError",
+      data: "Internal server error.",
+    });
+  }
+};
+
+module.exports = userExistsHandler;

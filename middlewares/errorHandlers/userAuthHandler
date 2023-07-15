@@ -1,0 +1,37 @@
+const User = require("../../models/User");
+
+const userAuthHandler = async (req, res, next) => {
+  if (!req.headers?.authorization?.startsWith("Bearer ")) {
+    res.status(401).json({
+      status: "fail",
+      code: "badAuth",
+      data: "Incorrect authentication type.",
+    });
+  } else {
+    const authToken = req.headers.authorization.split(" ")[1];
+    const { userID } = req.params;
+    try {
+      const matchingUser = await User.findById(userID).lean();
+
+      if (matchingUser.authToken !== authToken) {
+        res.status(401).json({
+          status: "fail",
+          code: "invalidToken",
+          data: "Invalid token. Please log in.",
+        });
+      } else {
+        req.authenticatedUserID = matchingUser._id;
+        next();
+      }
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        status: "error",
+        code: "serverError",
+        data: "Internal server error.",
+      });
+    }
+  }
+};
+
+module.exports = userAuthHandler;
